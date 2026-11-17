@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from Excepciones import AvisoNoPendiente
+from dominio.Excepciones import AvisoNoPendiente
 
 
 class EstadoAviso(ABC):

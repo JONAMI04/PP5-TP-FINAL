@@ -1,7 +1,7 @@
-from Catalogos import Gravedad, TipoSituacion
-from Estados import EstadoPendiente
-from Excepciones import AutorNoAutorizado, DatoInvalido
-from Valores import Descarte, Nota
+from dominio.Catalogos import Gravedad, TipoSituacion
+from dominio.Estados import EstadoPendiente
+from dominio.Excepciones import AutorNoAutorizado, DatoInvalido
+from dominio.Valores import Descarte, Nota
 
 
 class Aviso:

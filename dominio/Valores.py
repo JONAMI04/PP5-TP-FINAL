@@ -2,7 +2,6 @@ from dataclasses import dataclass
 from datetime import datetime
 from dominio.Excepciones import DatoInvalido, JustificacionVacia, NotaInvalida
 
-
 def _vacio(texto):
     return texto is None or not str(texto).strip()
 

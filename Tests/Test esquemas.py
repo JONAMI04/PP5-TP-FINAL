@@ -6,7 +6,7 @@ from dominio.Catalogos import Gravedad, TipoSituacion
 from dominio.Excepciones import AvisoNoPendiente, DatoInvalido, ValorFueraDeCatalogo
 from dominio.Reportante import Reportante
 from dominio.Valores import Ubicacion
-from dominio.Aviso import AvisoEsquema
+from esquemas.Aviso_esquema import AvisoEsquema
 
 AHORA = datetime(2026, 11, 20, 10, 0)
 
