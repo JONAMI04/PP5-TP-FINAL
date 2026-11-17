@@ -1,7 +1,5 @@
 from enum import Enum
-
-from dominio.excepciones import ValorFueraDeCatalogo
-
+from Excepciones import ValorFueraDeCatalogo
 
 class _Catalogo(Enum):
     """Catálogo cerrado: un valor que no es miembro nunca llega al dominio."""

@@ -1,7 +1,7 @@
-from dominio.catalogos import Gravedad, TipoSituacion
-from dominio.estados import EstadoPendiente
-from dominio.excepciones import AutorNoAutorizado, DatoInvalido
-from dominio.valores import Descarte, Nota
+from Catalogos import Gravedad, TipoSituacion
+from Estados import EstadoPendiente
+from Excepciones import AutorNoAutorizado, DatoInvalido
+from Valores import Descarte, Nota
 
 
 class Aviso:
@@ -10,8 +10,10 @@ class Aviso:
     def __init__(self, identificador, reportante, ubicacion, tipo,
                  gravedad_estimada, descripcion, fecha_hora_registro,
                  estado, notas=()):
-        """Constructor de reconstitución (tests, persistencia).
-        Para crear un aviso nuevo se usa `Aviso.registrar`."""
+        """Recibe objetos de dominio ya armados (estado, notas).
+        Para crear un aviso nuevo se usa `Aviso.registrar`, que lo deja Pendiente.
+        Convertir datos externos (JSON, documento) en estos objetos NO se hace acá:
+        lo hace el esquema (`esquemas.aviso_esquema.AvisoEsquema.a_dominio`)."""
         if reportante is None:
             raise DatoInvalido("El aviso necesita un reportante")
         if descripcion is None or not str(descripcion).strip():

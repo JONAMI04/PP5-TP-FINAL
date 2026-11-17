@@ -18,6 +18,8 @@ Interpretaciones tomadas:
 - **Toda operación valida antes de modificar** (R6): ante un rechazo, el aviso queda como estaba.
 - La **ubicación** se modela como valor (`Ubicacion`) con texto obligatorio; la consigna no pide
   más estructura que eso.
+- **El dominio no conoce la persistencia.** Convertir datos externos (JSON, documento de Mongo) en
+  objetos de dominio es trabajo del **esquema** (ver sección 6), no de la entidad.
 
 ## 2. Diagrama de clases
 
@@ -155,6 +157,12 @@ Descartado y Aceptado son estados finales: no hay transición de salida.
 | **Hace** | se valida al crearse: no puede ser vacía |
 | **Colabora con** | Aviso |
 
+| **AvisoEsquema** (DTO, fuera del dominio) | |
+|---|---|
+| **Sabe** | los datos del aviso como valores planos (textos, fechas, diccionarios) y las etiquetas de persistencia de los estados |
+| **Hace** | `desde_dominio(aviso)` y `a_dominio()`: convierte en ambos sentidos; rechaza documentos incoherentes |
+| **Colabora con** | Aviso, Reportante, Nota, Descarte, Ubicacion, estados |
+
 | **TipoSituacion / Gravedad** (catálogos) | |
 |---|---|
 | **Sabe** | sus valores cerrados |
@@ -192,5 +200,35 @@ El costo es que el aviso conoce el concepto de reportante, pero ya lo tiene como
 | R5 | `test_r5_r6_aviso_descartado_rechaza_nuevas_notas` (7), `..._un_segundo_descarte...` (8), `test_r5_aviso_aceptado_rechaza_nuevas_notas` (9), aceptado rechaza descartar |
 | R6 | cada test de rechazo verifica estado, notas y datos después del `pytest.raises`; además `test_r6_nota_rechazada...` |
 
-Escenario 9: no existe `aceptar` todavía, así que el aviso aceptado se arma con el constructor de
-reconstitución: `Aviso(..., estado=EstadoAceptado())`. Es el mismo camino que usará la persistencia.
+Escenario 9: no existe `aceptar` todavía, así que el aviso aceptado se arma desde el esquema
+(`AvisoEsquema(..., estado="aceptado").a_dominio()`). Es el mismo camino que usará la persistencia.
+
+Tests de la frontera (`tests/test_esquemas.py`): ida y vuelta de avisos pendientes (con notas en orden)
+y descartados, el aviso restaurado sigue aplicando las reglas, y rechazo de documentos incoherentes.
+Tests de diseño (`tests/test_diseno.py`): sin `isinstance`/`type()`, solo biblioteca estándar y sin
+`datetime.now()` en el dominio.
+
+## 6. Frontera: esquema y dominio (clases 9 y 10)
+
+| Capa | Responsabilidad | Conoce a |
+|---|---|---|
+| `dominio/` | Reglas, estados, invariantes | solo la biblioteca estándar |
+| `esquemas/` | Datos que cruzan la frontera (respuesta o persistencia). **Solo convierte** | el dominio |
+
+Reglas que se respetan (y que `tests/test_diseno.py` vigila):
+
+- El **dominio no importa** esquemas, FastAPI, Pydantic ni pymongo.
+- El esquema **no contiene reglas de negocio**: si el dominio rechaza algo, el esquema no lo
+  vuelve a validar.
+- Las **conversiones son explícitas** y van en los dos sentidos: `AvisoEsquema.desde_dominio(aviso)`
+  y `esquema.a_dominio()`.
+- Las **etiquetas de persistencia** ("pendiente", "descartado") y la tabla que las convierte en
+  estados viven en el esquema. El dominio no sabe cómo se guardan.
+
+**¿Dónde se reconstruye un aviso ya existente?** En `AvisoEsquema.a_dominio()`, no en la entidad.
+Eso resuelve el escenario 9: el aviso en estado *Aceptado* se arma desde un esquema con
+`estado="aceptado"`, sin implementar `aceptar`. El constructor de `Aviso` solo recibe objetos de
+dominio ya armados (un estado, notas); no interpreta textos ni documentos.
+
+El esquema también rechaza documentos incoherentes (estado desconocido, descartado sin descarte,
+pendiente con descarte), porque ahí el dato llega desde afuera.

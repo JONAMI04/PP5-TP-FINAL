@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
-
-from dominio.excepciones import AvisoNoPendiente
+from Excepciones import AvisoNoPendiente
 
 
 class EstadoAviso(ABC):
@@ -21,9 +20,7 @@ class EstadoAviso(ABC):
         """Admite o rechaza el descarte."""
 
     def _rechazar(self, operacion):
-        raise AvisoNoPendiente(
-            f"No se puede {operacion}: el aviso está {self.nombre.lower()}"
-        )
+        raise AvisoNoPendiente(f"No se puede {operacion}: el aviso está {self.nombre.lower()}")
 
 
 class EstadoPendiente(EstadoAviso):

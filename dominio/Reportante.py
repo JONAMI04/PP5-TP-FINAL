@@ -1,7 +1,5 @@
 from dataclasses import dataclass, field
-
-from dominio.excepciones import DatoInvalido
-
+from dominio.Excepciones import DatoInvalido
 
 @dataclass(frozen=True)
 class Reportante:
