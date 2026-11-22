@@ -1,7 +1,7 @@
 from dominio.Catalogos import Gravedad, TipoSituacion
 from dominio.Estados import EstadoPendiente
 from dominio.Excepciones import AutorNoAutorizado, DatoInvalido
-from dominio.Valores import Descarte, Nota
+from dominio.Valores import Descarte, Nota, Ubicacion
 
 
 class Aviso:
@@ -16,6 +16,10 @@ class Aviso:
         lo hace el esquema (`esquemas.aviso_esquema.AvisoEsquema.a_dominio`)."""
         if reportante is None:
             raise DatoInvalido("El aviso necesita un reportante")
+        try:
+            ubicacion = Ubicacion(ubicacion.texto)
+        except AttributeError:
+            raise DatoInvalido("El aviso necesita una ubicación válida") from None
         if descripcion is None or not str(descripcion).strip():
             raise DatoInvalido("La descripción no puede estar vacía")
         if fecha_hora_registro is None:

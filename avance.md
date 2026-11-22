@@ -181,7 +181,7 @@ Justificación:
 2. El aviso es quien **conoce a su reportante**: tiene el dato y la decisión.
 3. Si la regla viviera solo en la capa de la API, cualquier otro punto de entrada (otra API, un script,
    la interfaz gráfica) podría saltársela. En el dominio, ningún camino la evita.
-4. Se puede probar sin HTTP (`test_r2_solo_el_reportante_del_aviso_puede_agregar_notas`).
+4. Se puede probar sin HTTP (`test_r2_r6_solo_el_reportante_agrega_notas_y_el_rechazo_no_modifica_aviso`).
 
 División de responsabilidades: la API autentica, construye el `Reportante` desde el token y
 verifica que el perfil sea Reportante (si no, 403). El aviso compara ese reportante con el suyo y
@@ -191,21 +191,21 @@ El costo es que el aviso conoce el concepto de reportante, pero ya lo tiene como
 
 ## 6. Reglas y tests
 
-| Regla | Tests (`tests/test_avisos.py`) |
+| Regla | Tests (`Tests/Test_avisos.py`) |
 |---|---|
-| R1 | `test_r1_aviso_recien_registrado_esta_pendiente_sin_notas_ni_descarte` (escenario 1), `..._conserva_los_datos...`, catálogos fuera de rango, descripción/reportante/ubicación vacíos |
-| R2 | `test_r2_agregar_nota_..._conserva_autor_fecha_y_hora` (2), `test_r2_dos_notas_..._en_el_orden...` (3), nota sin texto, autor ajeno |
+| R1 | `test_r1_aviso_registrado_queda_pendiente_sin_notas_ni_descarte` (escenario 1), `test_r1_registrar_rechaza_ubicacion_ausente_o_invalida`, `test_r1_registrar_rechaza_valores_fuera_de_catalogo`, `test_r1_registrar_rechaza_datos_obligatorios_ausentes` |
+| R2 | `test_r2_agregar_nota_conserva_autor_texto_y_fecha_hora` (2), `test_r2_dos_notas_se_conservan_en_orden` (3), `test_r2_r6_solo_el_reportante_agrega_notas_y_el_rechazo_no_modifica_aviso` |
 | R3 | `test_r3_agregar_nota_no_modifica_los_datos_originales` (4) |
-| R4 | `test_r4_descartar_aviso_pendiente_conserva_justificacion_y_fecha` (5), `test_r4_r6_descartar_con_justificacion_vacia...` (6) |
-| R5 | `test_r5_r6_aviso_descartado_rechaza_nuevas_notas` (7), `..._un_segundo_descarte...` (8), `test_r5_aviso_aceptado_rechaza_nuevas_notas` (9), aceptado rechaza descartar |
-| R6 | cada test de rechazo verifica estado, notas y datos después del `pytest.raises`; además `test_r6_nota_rechazada...` |
+| R4 | `test_r4_descartar_aviso_pendiente_conserva_justificacion_y_fecha` (5), `test_r4_r6_justificacion_vacia_rechaza_sin_modificar_aviso` (6) |
+| R5 | `test_r5_r6_aviso_descartado_rechaza_nueva_nota_sin_modificarlo` (7), `test_r5_r6_aviso_descartado_rechaza_segundo_descarte_sin_modificarlo` (8), `test_r5_r6_aviso_aceptado_rechaza_nota_y_descarte_sin_modificarlo` (9) |
+| R6 | cada rechazo comprueba el estado, las notas y el descarte después del `pytest.raises`; también `test_r6_nota_vacia_rechaza_sin_modificar_aviso` |
 
 Escenario 9: no existe `aceptar` todavía, así que el aviso aceptado se arma desde el esquema
 (`AvisoEsquema(..., estado="aceptado").a_dominio()`). Es el mismo camino que usará la persistencia.
 
-Tests de la frontera (`tests/test_esquemas.py`): ida y vuelta de avisos pendientes (con notas en orden)
+Tests de la frontera (`Tests/Test_esquemas.py`): ida y vuelta de avisos pendientes (con notas en orden)
 y descartados, el aviso restaurado sigue aplicando las reglas, y rechazo de documentos incoherentes.
-Tests de diseño (`tests/test_diseno.py`): sin `isinstance`/`type()`, solo biblioteca estándar y sin
+Tests de diseño (`Tests/Test_disenio.py`): sin `isinstance`/`type()`, solo biblioteca estándar y sin
 `datetime.now()` en el dominio.
 
 ## 6. Frontera: esquema y dominio (clases 9 y 10)
@@ -215,7 +215,7 @@ Tests de diseño (`tests/test_diseno.py`): sin `isinstance`/`type()`, solo bibli
 | `dominio/` | Reglas, estados, invariantes | solo la biblioteca estándar |
 | `esquemas/` | Datos que cruzan la frontera (respuesta o persistencia). **Solo convierte** | el dominio |
 
-Reglas que se respetan (y que `tests/test_diseno.py` vigila):
+Reglas que se respetan (y que `Tests/Test_disenio.py` vigila):
 
 - El **dominio no importa** esquemas, FastAPI, Pydantic ni pymongo.
 - El esquema **no contiene reglas de negocio**: si el dominio rechaza algo, el esquema no lo
